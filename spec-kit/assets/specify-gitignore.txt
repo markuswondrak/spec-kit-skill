@@ -1,0 +1,29 @@
+# Strict .specify version-control policy.
+# Append to the managed .specify/.gitignore (patterns are relative to .specify/).
+# If you put these rules in the root .gitignore instead, prefix every pattern
+# with ".specify/" (e.g. ".specify/presets/*").
+
+# --- Installed from catalogs. Reconstructed with `specify bundle install`. ---
+extensions/*/*
+!extensions/*/*-config.yml
+presets/*
+workflows/*
+!workflows/overlays/
+workflows/steps/*
+
+# Keep machine-local extension overrides ignored even though the negation above
+# would otherwise match them (*-config.yml also matches local-config.yml).
+extensions/*/local-config.yml
+extensions/*/*-config.local.yml
+
+# --- Runtime state, caches, and backups. ---
+workflows/runs/
+workflows/.cache/
+extensions/.cache/
+extensions/.backup/
+
+# --- Installation-state records. Rebuilt on reconstruction; stale copies can
+# --- make the bundler believe an ignored component is present. ---
+extensions/.registry
+bundle-records.json
+workflows/workflow-registry.json

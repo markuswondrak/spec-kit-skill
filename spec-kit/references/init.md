@@ -1,0 +1,75 @@
+# Init, Integrations, and CLI Lifecycle
+
+## Prerequisites and CLI install
+
+- Python 3.11+, [`uv`](https://docs.astral.sh/uv/), a supported agent.
+- Install from PyPI: `uv tool install specify-cli`
+- Pin a release: `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@vX.Y.Z` (keep the leading `v`).
+- Lifecycle: `specify self check` (newer release available?), `specify self upgrade` (`--tag vX.Y.Z` to pin), `specify version --features`, `specify version --json`.
+
+## Initialize a project
+
+```bash
+specify init <name> --integration <key> --non-interactive     # new directory
+specify init . --integration <key> --non-interactive          # current directory (--here works too)
+specify init . --force --integration <key> --non-interactive  # merge into a non-empty directory
+```
+
+Key options:
+
+| Option | Purpose |
+| --- | --- |
+| `--integration <key>` | Agent integration. Without it, non-interactive runs default to Copilot (`SPECKIT_INTEGRATION_DEFAULT` changes the fallback). |
+| `--integration-options "<opts>"` | Integration-specific flags, e.g. `--skills`, or `--commands-dir <dir>` for `generic`. |
+| `--script sh\|ps\|py` | Script flavor for the feature helper scripts. |
+| `--preset <id>` | Install a preset during init. |
+| `--extension <name\|path\|url>` | Install extension(s) during init; repeatable. URL installs in non-interactive mode need `--trust-extension-urls`. |
+| `--here`, `--force` | Target the current directory / skip the non-empty-directory confirmation. |
+| `--non-interactive` | Never prompt; fail instead of hanging. Required for agent harnesses. |
+| `--ignore-agent-tools` | Skip checks for agent CLI tools on the PATH. |
+
+Initialization is offline: assets come from the installed CLI package, so templates always match the CLI version.
+
+Integration keys include `claude`, `copilot`, `gemini`, `opencode`, `codex`, `generic` and more; `specify integration list` shows availability. Naming surface varies by agent:
+
+- Command style (`/speckit.specify`) — Claude in commands mode, Copilot, Gemini, opencode (`.opencode/commands/speckit.*.md`), ...
+- Skills style (`/speckit-specify`, `.claude/skills/speckit-specify/SKILL.md`) — Claude now installs skills by default; Codex/Command Code skills use `$speckit-*`; Kimi uses `/skill:speckit-*`.
+
+The generated files in `.claude/`, `.opencode/`, etc. are authoritative for the project's agent.
+
+## After init
+
+1. `specify check` — required tools and installed integrations.
+2. `specify integration status` — what the project currently targets.
+3. Git workflows need the git extension (not installed by default):
+   `specify extension add git` (bundled; works offline).
+4. Apply the strict VCS policy from [vcs-policy.md](vcs-policy.md).
+5. Acceptance test on a fresh clone: `git clone ... && specify bundle install <bundle-id>` must reach a working state.
+
+## Manage integrations after init
+
+```bash
+specify integration list                    # available + installed
+specify integration install <key>           # add an integration to an existing project
+specify integration switch <key>            # switch the active integration
+specify integration upgrade <key>           # refresh an installed integration (diff-aware)
+specify integration uninstall <key>         # remove it, preserving user-modified files
+specify integration use <key>               # set default without uninstalling others
+```
+
+## Environment variables worth knowing
+
+| Variable | Effect |
+| --- | --- |
+| `SPECKIT_INTEGRATION_DEFAULT` | Fallback integration for `init` when `--integration` is omitted. |
+| `SPECIFY_INIT_DIR` | Target a member project from outside it (must contain `.specify/`). Honored by project-scoped CLI commands and core feature scripts. |
+| `SPECIFY_FEATURE_DIRECTORY` | Override the active feature directory (takes precedence over `.specify/feature.json`). |
+| `SPECIFY_FEATURE_NO_PERSIST=1` | Do not rewrite `.specify/feature.json` (concurrent agents). |
+| `GH_TOKEN` / `GITHUB_TOKEN` | Needed for private GitHub-hosted catalogs and archives. |
+
+## Verify
+
+- `specify --version` runs and matches the intended release.
+- `.specify/` exists with `templates/`, `scripts/`, `memory/constitution.md`, `integration.json`.
+- The agent directory contains the expected `speckit-*` commands/skills.
+- `.specify/.gitignore` contains the managed lines plus, if desired, the strict policy rules.
