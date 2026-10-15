@@ -68,6 +68,7 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 - Frontmatter and structure pass the official validator: `uvx --from skills-ref agentskills validate ./spec-kit`
 - Commands and flags checked against `specify` 1.0.13
 - The gitignore policy is tested against a real project: installed artifacts ignored, project config tracked, `local-config.yml` still ignored
+- `specify init --here --force` rewrite behavior checked on 1.0.13: managed `.specify/.gitignore` and integration manifests are regenerated — the VCS policy documents the placement that keeps restores clean
 
 ## Compatibility
 

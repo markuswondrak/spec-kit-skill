@@ -19,11 +19,13 @@ feature.json
 extensions/*/local-config.yml
 ```
 
-Edits to that managed file are preserved on re-init; `specify init --here --force` restores the managed content.
+`specify init --here --force` (the scripted variant for a non-empty checkout) **rewrites that managed file from the template — appended rules are lost**, contradicting the file's "changes are preserved" header (observed on 1.0.13). The same run re-stamps `.specify/integrations/<key>.manifest.json` with a fresh `installed_at`.
 
 ## Strict policy (catalog-managed projects)
 
 Append the rules from [../assets/specify-gitignore.txt](../assets/specify-gitignore.txt) to `.specify/.gitignore` (patterns are relative to `.specify/`; prefix everything with `.specify/` instead if you keep the rules in the root `.gitignore`).
+
+Placement follows the restore path: if re-running `specify init` is part of how a checkout gets rebuilt (see "Scaffold-restored projects" below), the rules belong in the **root `.gitignore`** — anything appended to `.specify/.gitignore` is wiped by `init --force` and the post-restore `git status` turns dirty. Appending to the managed file is only durable in projects that never re-run init.
 
 Why each group:
 
@@ -34,6 +36,20 @@ Why each group:
 - `.specify/extensions.yml` is *not* install state: it is extension enablement and hook configuration, and is committed.
 
 Locally authored packages are the one judgment call: if the project deliberately owns a package's source, keep the source outside `.specify/` (or commit it explicitly) and treat the installed copy as reconstructable.
+
+## Scaffold-restored projects (no bundle)
+
+Some projects also ignore the init-scaffolded core (`.specify/scripts/`, `.specify/templates/`) and rebuild everything with one `specify init` command instead of a bundle:
+
+- The strict rules live in the **root `.gitignore`** with `.specify/` prefixes, plus `.specify/scripts/*`, `.specify/templates/*`, and `.specify/integrations/*.manifest.json` (init re-stamps `installed_at`, so a tracked manifest turns up modified after every restore).
+- `.specify/.gitignore` is committed exactly as scaffolded (managed-only), so a refresh produces no diff.
+- Restore and acceptance in one step:
+
+  ```bash
+  specify init --here --force --non-interactive --integration <agent> --script sh [--preset <id>]
+  ```
+
+  Expected afterwards: `.specify/scripts`, `.specify/templates`, installed presets/workflows, and the agent commands are back; `git status` is clean.
 
 ## Fresh-clone acceptance test
 
@@ -50,7 +66,7 @@ If more steps are needed — manual `specify extension add` runs, remembered pri
 
 Do not test by deleting `.specify/extensions/`, `.specify/presets/`, or `.specify/workflows/` from a working checkout: that also deletes tracked intent (extension project config, overlays, installation metadata). Always clone into a clean directory.
 
-For projects without a bundle: either re-add each component explicitly as part of the restore procedure, or package the stack as a bundle so `bundle install` is the single declaration. Prefer the bundle.
+For projects without a bundle: either re-add each component explicitly as part of the restore procedure, or package the stack as a bundle so `bundle install` is the single declaration. Prefer the bundle. For scaffold-restored projects the single command is the `specify init --here --force` line above — same acceptance: it runs, the agent commands are present, `git status` is clean.
 
 ## Deliberate priorities
 
@@ -62,8 +78,9 @@ Composition is part of the declaration:
 
 ## Checklist
 
-- [ ] `.specify/.gitignore` contains managed lines plus strict-policy rules.
-- [ ] No installed copy, registry, cache, or backup is tracked (`git status` after `bundle install` should be clean).
+- [ ] Strict rules are placed deliberately: in `.specify/.gitignore` (only if init is never re-run) or in the root `.gitignore` (when `specify init --force` is the restore path).
+- [ ] If init is the restore path: `.specify/.gitignore` stays managed-only and `.specify/integrations/*.manifest.json` is ignored.
+- [ ] No installed copy, registry, cache, or backup is tracked; `git status` is clean after `bundle install` and after a scaffold restore.
 - [ ] Bundle declaration and pins are committed; every pin matches what is installed.
 - [ ] Preset priorities are explicit; composition strategies are intentional.
 - [ ] Fresh clone + `specify bundle install <id>` reaches a working state and matches the pins.

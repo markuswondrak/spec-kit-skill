@@ -4,7 +4,7 @@ description: Operate GitHub Spec Kit (spec-driven development toolkit, `specify`
 license: MIT
 metadata:
   author: Markus Wondrak
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Spec Kit
@@ -37,7 +37,7 @@ This skill covers the operational side: setup, component management, authoring, 
 1. Check tooling: `specify check`, `specify version --features`. Install: `uv tool install specify-cli`; upgrade: `specify self upgrade`.
 2. Initialize: `specify init . --integration <agent> --non-interactive` (directory non-empty: add `--force`).
 3. Optionally add components at init: `--preset <id>`, repeated `--extension <name|path|url>` (e.g. `--extension git`).
-4. Apply the strict VCS policy: append the rules from [assets/specify-gitignore.txt](assets/specify-gitignore.txt) to `.specify/.gitignore`.
+4. Apply the strict VCS policy: the rules from [assets/specify-gitignore.txt](assets/specify-gitignore.txt) go in `.specify/.gitignore` — or in the root `.gitignore` with `.specify/` prefixes when `specify init --force` is part of the restore path, since init rewrites the managed file ([vcs-policy](references/vcs-policy.md)).
 5. Verify: `specify integration status`, `specify extension list`. Acceptance test: fresh clone + `specify bundle install <bundle-id>` reaches a working state.
 
 ## Flow: install a package
@@ -74,4 +74,5 @@ This skill covers the operational side: setup, component management, authoring, 
 | `Extension 'x' not found` | Not in an install-allowed catalog; may be community-only → `specify extension info x`, then `--from`. |
 | Bundle install refuses a version | One version per component id: another bundle or independent install pins it. |
 | Fresh clone broken | Installed copies committed without pins; fix the declaration (bundle), not the artifacts. |
+| Dirty tree or vanished rules after `specify init --force` | Init rewrites `.specify/.gitignore` and re-stamps `integrations/*.manifest.json`; keep strict rules in the root `.gitignore` and ignore the manifests ([vcs-policy](references/vcs-policy.md)). |
 | Stale behavior after an update | `specify self check` for CLI drift; `specify <kind> update`; the upstream version was not bumped. |

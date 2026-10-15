@@ -12,7 +12,7 @@
 ```bash
 specify init <name> --integration <key> --non-interactive     # new directory
 specify init . --integration <key> --non-interactive          # current directory (--here works too)
-specify init . --force --integration <key> --non-interactive  # merge into a non-empty directory
+specify init . --force --integration <key> --non-interactive  # merge into a non-empty directory (rewrites managed files)
 ```
 
 Key options:
@@ -29,6 +29,8 @@ Key options:
 | `--ignore-agent-tools` | Skip checks for agent CLI tools on the PATH. |
 
 Initialization is offline: assets come from the installed CLI package, so templates always match the CLI version.
+
+`--force` merges into an existing checkout, but managed artifacts are rewritten: `.specify/.gitignore` is reset to the managed template (appended rules are lost; [vcs-policy.md](vcs-policy.md) shows the root-`.gitignore` placement) and `.specify/integrations/<key>.manifest.json` gets a fresh `installed_at`.
 
 Integration keys include `claude`, `copilot`, `gemini`, `opencode`, `codex`, `generic` and more; `specify integration list` shows availability. Naming surface varies by agent:
 
@@ -72,4 +74,4 @@ specify integration use <key>               # set default without uninstalling o
 - `specify --version` runs and matches the intended release.
 - `.specify/` exists with `templates/`, `scripts/`, `memory/constitution.md`, `integration.json`.
 - The agent directory contains the expected `speckit-*` commands/skills.
-- `.specify/.gitignore` contains the managed lines plus, if desired, the strict policy rules.
+- Strict policy rules are in place per [vcs-policy.md](vcs-policy.md): in `.specify/.gitignore` (init never re-runs) or in the root `.gitignore` with `.specify/` prefixes (init is the restore path).

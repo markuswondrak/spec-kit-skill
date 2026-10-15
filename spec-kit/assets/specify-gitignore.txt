@@ -1,7 +1,10 @@
 # Strict .specify version-control policy.
-# Append to the managed .specify/.gitignore (patterns are relative to .specify/).
-# If you put these rules in the root .gitignore instead, prefix every pattern
-# with ".specify/" (e.g. ".specify/presets/*").
+# Two safe placements (see references/vcs-policy.md):
+# - Append to the managed .specify/.gitignore (patterns relative to .specify/).
+#   Only durable if `specify init` is never re-run: `init --force` rewrites that
+#   file and drops appended rules (observed on 1.0.13).
+# - Put the rules in the root .gitignore with every pattern prefixed ".specify/"
+#   (e.g. ".specify/presets/*"). Required when init is part of the restore path.
 
 # --- Installed from catalogs. Reconstructed with `specify bundle install`. ---
 extensions/*/*
