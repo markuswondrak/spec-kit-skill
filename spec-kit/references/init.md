@@ -22,11 +22,13 @@ Key options:
 | `--integration <key>` | Agent integration. Without it, non-interactive runs default to Copilot (`SPECKIT_INTEGRATION_DEFAULT` changes the fallback). |
 | `--integration-options "<opts>"` | Integration-specific flags, e.g. `--skills`, or `--commands-dir <dir>` for `generic`. |
 | `--script sh\|ps\|py` | Script flavor for the feature helper scripts. |
-| `--preset <id>` | Install a preset during init. |
+| `--preset <id>` | Install a preset during init (first-party: `lean`, a minimal core workflow). |
 | `--extension <name\|path\|url>` | Install extension(s) during init; repeatable. URL installs in non-interactive mode need `--trust-extension-urls`. |
 | `--here`, `--force` | Target the current directory / skip the non-empty-directory confirmation. |
 | `--non-interactive` | Never prompt; fail instead of hanging. Required for agent harnesses. |
 | `--ignore-agent-tools` | Skip checks for agent CLI tools on the PATH. |
+
+In interactive sessions, ask the user before init (together with the integration choice) whether to add the optional first-party extras: the `lean` preset (`--preset lean`) and/or the `bugfix` bundle (`specify bundle install bugfix` directly after init). In CI/agent runs, skip the question.
 
 Initialization is offline: assets come from the installed CLI package, so templates always match the CLI version.
 
@@ -45,8 +47,9 @@ The generated files in `.claude/`, `.opencode/`, etc. are authoritative for the 
 2. `specify integration status` — what the project currently targets.
 3. Git workflows need the git extension (not installed by default):
    `specify extension add git` (bundled; works offline).
-4. Apply the strict VCS policy from [vcs-policy.md](vcs-policy.md).
-5. Acceptance test on a fresh clone: `git clone ... && specify bundle install <bundle-id>` must reach a working state.
+4. Optional first-party bundle when bugs are in scope: `specify bundle install bugfix` (bug extension + bugfix workflow, pinned). The `lean` preset is passed to init itself (`--preset lean`).
+5. Apply the strict VCS policy from [vcs-policy.md](vcs-policy.md).
+6. Acceptance test on a fresh clone: `git clone ... && specify bundle install <bundle-id>` must reach a working state.
 
 ## Manage integrations after init
 

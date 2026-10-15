@@ -35,7 +35,8 @@ Or keep it project-scoped: `cp -r spec-kit .opencode/skills/` (or `.claude/skill
 Short prompts that hit the ground running:
 
 ```text
-Init spec-kit here for opencode, non-interactive, then apply the strict .specify VCS policy.
+What's the spec-kit status here?
+Init spec-kit here for opencode, non-interactive; ask me about lean/bugfix first, then apply the strict .specify VCS policy.
 Show me specify bundle info bugfix, then install it pinned.
 Search the spec-kit catalogs for issue-tracking extensions, summarize trust and versions, install the best fit.
 Scaffold a spec-kit preset that enforces our review checklist, test it with --dev.
@@ -47,7 +48,7 @@ Bootstrap a fresh clone using its bundle declaration; report missing pins.
 
 | Path | Contents |
 | --- | --- |
-| `SKILL.md` | Routing table, ground rules, three core flows, prompt templates, pitfalls |
+| `SKILL.md` | Routing table, ground rules, status report, three core flows, prompt templates, pitfalls |
 | `references/init.md` | CLI install/upgrade, `specify init` flags, integrations, env vars |
 | `references/packages.md` | Extension/preset/workflow/step/bundle commands, catalogs, trust model |
 | `references/authoring.md` | Package ownership rules, manifests, strategies, dev loops, publishing |

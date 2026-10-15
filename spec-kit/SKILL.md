@@ -4,7 +4,7 @@ description: Operate GitHub Spec Kit (spec-driven development toolkit, `specify`
 license: MIT
 metadata:
   author: Markus Wondrak
-  version: "1.1"
+  version: "1.3"
 ---
 
 # Spec Kit
@@ -17,6 +17,7 @@ This skill covers the operational side: setup, component management, authoring, 
 
 | Task | Read |
 | --- | --- |
+| No task given — report the current state (initialized? components? runs?) | [Default: status report](#default-status-report) |
 | Initialize or upgrade a project, pick agent integration, install the CLI | [references/init.md](references/init.md) |
 | Search/install/update extensions, presets, workflows, bundles; catalogs | [references/packages.md](references/packages.md) |
 | Create or publish an extension, preset, workflow, step, or bundle | [references/authoring.md](references/authoring.md) |
@@ -32,11 +33,24 @@ This skill covers the operational side: setup, component management, authoring, 
 - Extensions, workflows, and step packages execute code. Review untrusted sources first; shell steps run unsandboxed with your privileges.
 - Bump the component version on every content change — `update` is version-driven.
 
+## Default: status report
+
+Invoked without a concrete task, do not init or install anything — collect the state read-only, then summarize:
+
+1. Project: `.specify/` present? Not initialized → say so and offer the bootstrap flow. Initialized → continue.
+2. CLI and integration: `specify version`, `specify self check` (drift), `specify integration status`.
+3. Components: `specify extension list`, `specify preset list`, `specify workflow list`, `specify bundle list` — include versions and enabled/disabled state; compare installed vs. pinned.
+4. Runs in flight: `specify workflow status --json` — call out paused runs (gate) with their `run_id` and how to resume.
+5. Active feature: `.specify/feature.json` (when present).
+6. Working tree: `git status --short` — uncommitted intent; strict VCS policy in place?
+
+Report a short bullet list, not raw command dumps. Flag what needs action (drifted pins, stale or disabled components, dirty tree, missing commands) and point to the matching flow.
+
 ## Flow: bootstrap a project
 
 1. Check tooling: `specify check`, `specify version --features`. Install: `uv tool install specify-cli`; upgrade: `specify self upgrade`.
 2. Initialize: `specify init . --integration <agent> --non-interactive` (directory non-empty: add `--force`).
-3. Optionally add components at init: `--preset <id>`, repeated `--extension <name|path|url>` (e.g. `--extension git`).
+3. In an interactive session, ask the user before init whether to add the optional first-party extras: the `lean` preset (`--preset lean`) and/or the `bugfix` bundle (`specify bundle install bugfix` right after init). Then add components at init: `--preset <id>`, repeated `--extension <name|path|url>` (e.g. `--extension git`).
 4. Apply the strict VCS policy: the rules from [assets/specify-gitignore.txt](assets/specify-gitignore.txt) go in `.specify/.gitignore` — or in the root `.gitignore` with `.specify/` prefixes when `specify init --force` is part of the restore path, since init rewrites the managed file ([vcs-policy](references/vcs-policy.md)).
 5. Verify: `specify integration status`, `specify extension list`. Acceptance test: fresh clone + `specify bundle install <bundle-id>` reaches a working state.
 
@@ -57,7 +71,7 @@ This skill covers the operational side: setup, component management, authoring, 
 
 ## Prompt templates (short)
 
-- `Init spec-kit here for <agent>, non-interactive, then apply the strict .specify VCS policy.`
+- `Init spec-kit here for <agent>, non-interactive; ask me about lean/bugfix first, then apply the strict .specify VCS policy.`
 - `Show me specify bundle info <id>, then install it pinned.`
 - `Search the spec-kit catalogs for <topic>, summarize trust and versions, install the best fit from an install-allowed source.`
 - `Scaffold a spec-kit preset that <behavior>, test it with --dev, verify with specify preset resolve spec-template.`
