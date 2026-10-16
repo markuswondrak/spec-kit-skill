@@ -5,6 +5,7 @@
 ![Agent Skills](https://img.shields.io/badge/Agent%20Skills-compatible-blue)
 ![Validated](https://img.shields.io/badge/agentskills--ref-valid-brightgreen)
 ![Spec Kit](https://img.shields.io/badge/Spec%20Kit-1.0.x-6f42c1)
+[![skills.sh](https://skills.sh/b/markuswondrak/spec-kit-skill)](https://skills.sh/markuswondrak/spec-kit-skill)
 
 An [Agent Skill](https://agentskills.io) for [GitHub Spec Kit](https://github.com/github/spec-kit). It gives any compatible coding agent the operational knowledge that the docs spread across a dozen pages:
 
@@ -15,20 +16,33 @@ An [Agent Skill](https://agentskills.io) for [GitHub Spec Kit](https://github.co
 
 ## Quick start
 
-Copy the skill into your agent's skills directory (keep the directory name `spec-kit`):
+Install with the cross-agent [skills](https://github.com/vercel-labs/skills) CLI (opencode, Claude Code, Codex, Cursor, ...):
+
+```bash
+npx skills add markuswondrak/spec-kit-skill
+```
+
+Claude Code users can add the plugin marketplace instead:
+
+```bash
+claude plugin marketplace add markuswondrak/spec-kit-skill
+claude plugin install spec-kit@spec-kit-skill
+```
+
+Or copy manually (keep the directory name `spec-kit`):
 
 ```bash
 # opencode
-cp -r spec-kit ~/.config/opencode/skills/
+cp -r skills/spec-kit ~/.config/opencode/skills/
 
 # Claude Code
-cp -r spec-kit ~/.claude/skills/
+cp -r skills/spec-kit ~/.claude/skills/
 
 # generic Agent Skills location
-cp -r spec-kit ~/.agents/skills/
+cp -r skills/spec-kit ~/.agents/skills/
 ```
 
-Or keep it project-scoped: `cp -r spec-kit .opencode/skills/` (or `.claude/skills/`).
+Or keep it project-scoped: `cp -r skills/spec-kit .opencode/skills/` (or `.claude/skills/`).
 
 ## Try it
 
@@ -48,12 +62,13 @@ Bootstrap a fresh clone using its bundle declaration; report missing pins.
 
 | Path | Contents |
 | --- | --- |
-| `SKILL.md` | Routing table, ground rules, status report, three core flows, prompt templates, pitfalls |
-| `references/init.md` | CLI install/upgrade, `specify init` flags, integrations, env vars |
-| `references/packages.md` | Extension/preset/workflow/step/bundle commands, catalogs, trust model |
-| `references/authoring.md` | Package ownership rules, manifests, strategies, dev loops, publishing |
-| `references/vcs-policy.md` | Intent vs. installed artifacts, strict `.gitignore` policy, fresh-clone test |
-| `assets/specify-gitignore.txt` | Drop-in rules for the strict `.specify` version-control policy |
+| `skills/spec-kit/SKILL.md` | Routing table, ground rules, status report, three core flows, prompt templates, pitfalls |
+| `skills/spec-kit/references/init.md` | CLI install/upgrade, `specify init` flags, integrations, env vars |
+| `skills/spec-kit/references/packages.md` | Extension/preset/workflow/step/bundle commands, catalogs, trust model |
+| `skills/spec-kit/references/authoring.md` | Package ownership rules, manifests, strategies, dev loops, publishing |
+| `skills/spec-kit/references/vcs-policy.md` | Intent vs. installed artifacts, strict `.gitignore` policy, fresh-clone test |
+| `skills/spec-kit/assets/specify-gitignore.txt` | Drop-in rules for the strict `.specify` version-control policy |
+| `.claude-plugin/` | Claude Code plugin + marketplace manifests (auto-discovers `skills/`) |
 
 The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 
@@ -67,7 +82,9 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 
 ## Verified
 
-- Frontmatter and structure pass the official validator: `uvx --from skills-ref agentskills validate ./spec-kit`
+- Frontmatter and structure pass the official validator: `uvx --from skills-ref agentskills validate ./skills/spec-kit`
+- Claude Code manifests pass `claude plugin validate .`
+- Installable via `npx skills add markuswondrak/spec-kit-skill` and `claude plugin marketplace add markuswondrak/spec-kit-skill`
 - Commands and flags checked against `specify` 1.0.13
 - The gitignore policy is tested against a real project: installed artifacts ignored, project config tracked, `local-config.yml` still ignored
 - `specify init --here --force` rewrite behavior checked on 1.0.13: managed `.specify/.gitignore` and integration manifests are regenerated — the VCS policy documents the placement that keeps restores clean

@@ -1,0 +1,19 @@
+{
+  "name": "spec-kit-skill",
+  "metadata": {
+    "description": "Agent Skill for GitHub Spec Kit by Markus Wondrak."
+  },
+  "owner": {
+    "name": "Markus Wondrak",
+    "url": "https://github.com/markuswondrak"
+  },
+  "plugins": [
+    {
+      "name": "spec-kit",
+      "source": "./",
+      "description": "Operate GitHub Spec Kit (specify CLI): initialize projects, manage extensions, presets, workflows, and bundles, author packages, apply the .specify VCS policy.",
+      "license": "MIT",
+      "keywords": ["spec-kit", "specify", "sdd", "spec-driven-development"]
+    }
+  ]
+}
