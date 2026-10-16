@@ -1,5 +1,7 @@
 # Version-Control Policy for `.specify/`
 
+Related docs: [guides/existing-projects](https://github.github.io/spec-kit/guides/existing-projects.html) (initializing into an existing repo), [reference/bundles](https://github.github.io/spec-kit/reference/bundles.html) (declaration semantics).
+
 ## Principle
 
 Commit project intent; reconstruct installed artifacts. Catalogs and bundle declarations say *what* the project depends on; installed copies and registries are *outputs* of installation and execution. When both are committed, they drift and the repository no longer says which is true.

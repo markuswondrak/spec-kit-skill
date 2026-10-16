@@ -5,6 +5,7 @@
 - Python 3.11+, [`uv`](https://docs.astral.sh/uv/), a supported agent.
 - Install from PyPI: `uv tool install specify-cli`
 - Pin a release: `uv tool install specify-cli --from git+https://github.com/github/spec-kit.git@vX.Y.Z` (keep the leading `v`).
+- Full install matrix (uv, pipx, PyPI, air-gapped): [installation](https://github.github.io/spec-kit/installation.html).
 - Lifecycle: `specify self check` (newer release available?), `specify self upgrade` (`--tag vX.Y.Z` to pin), `specify version --features`, `specify version --json`.
 
 ## Initialize a project
@@ -34,7 +35,7 @@ Initialization is offline: assets come from the installed CLI package, so templa
 
 `--force` merges into an existing checkout, but managed artifacts are rewritten: `.specify/.gitignore` is reset to the managed template (appended rules are lost; [vcs-policy.md](vcs-policy.md) shows the root-`.gitignore` placement) and `.specify/integrations/<key>.manifest.json` gets a fresh `installed_at`.
 
-Integration keys include `claude`, `copilot`, `gemini`, `opencode`, `codex`, `generic` and more; `specify integration list` shows availability. Naming surface varies by agent:
+Integration keys include `claude`, `copilot`, `gemini`, `opencode`, `codex`, `generic` and more; `specify integration list` shows availability ([reference](https://github.github.io/spec-kit/reference/integrations.html)). Naming surface varies by agent:
 
 - Command style (`/speckit.specify`) — Claude in commands mode, Copilot, Gemini, opencode (`.opencode/commands/speckit.*.md`), ...
 - Skills style (`/speckit-specify`, `.claude/skills/speckit-specify/SKILL.md`) — Claude now installs skills by default; Codex/Command Code skills use `$speckit-*`; Kimi uses `/skill:speckit-*`.

@@ -4,7 +4,7 @@ description: Operate GitHub Spec Kit (spec-driven development toolkit, `specify`
 license: MIT
 metadata:
   author: Markus Wondrak
-  version: "1.3"
+  version: "1.4"
 ---
 
 # Spec Kit
@@ -12,6 +12,8 @@ metadata:
 Spec Kit is GitHub's spec-driven development toolkit. A project gets a `.specify/` directory (constitution, templates, scripts, components) plus agent commands (`/speckit-specify`, `/speckit-plan`, ...) that walk a feature through specify → plan → tasks → implement.
 
 This skill covers the operational side: setup, component management, authoring, and version control. Invoke the installed SDD commands directly when asked to run them — they ship with the project's agent integration.
+
+Canonical docs: <https://github.github.io/spec-kit/> — [quickstart](https://github.github.io/spec-kit/quickstart.html), [reference](https://github.github.io/spec-kit/reference/overview.html), [community](https://github.github.io/spec-kit/community/overview.html). The reference pages are authoritative for commands and manifests; when they differ from this skill, follow the docs and treat this file as operational shortcuts.
 
 ## Route by task
 

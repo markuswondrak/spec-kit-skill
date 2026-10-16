@@ -63,6 +63,7 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 - **Commit intent, reconstruct installations.** Registries and installed copies never get committed next to the components they describe.
 - **Pin everything.** Versions, preset priorities, composition strategies — deliberately.
 - **Vet, then install.** Community catalogs are discovery-only; review before `--from`.
+- **Don't restate the docs.** Commands and manifests live in the [official docs](https://github.github.io/spec-kit/); the skill adds the operational layer and links out instead of duplicating.
 
 ## Verified
 

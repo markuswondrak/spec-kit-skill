@@ -1,5 +1,7 @@
 # Packages: Extensions, Presets, Workflows, Steps, Bundles
 
+Official reference (authoritative for commands, flags, and semantics): [extensions](https://github.github.io/spec-kit/reference/extensions.html) · [presets](https://github.github.io/spec-kit/reference/presets.html) · [workflows](https://github.github.io/spec-kit/reference/workflows.html) · [bundles](https://github.github.io/spec-kit/reference/bundles.html) · [artifacts](https://github.github.io/spec-kit/reference/artifacts.html). The summaries below are shortcuts — check the docs when behavior matters.
+
 ## Component types
 
 | Type | Purpose | Adds behavior? | Location |

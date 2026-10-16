@@ -1,5 +1,7 @@
 # Authoring Spec Kit Packages
 
+Official sources (authoritative, use for depth): [reference/extensions](https://github.github.io/spec-kit/reference/extensions.html) · [reference/presets](https://github.github.io/spec-kit/reference/presets.html) · [reference/workflows](https://github.github.io/spec-kit/reference/workflows.html) · [reference/bundles](https://github.github.io/spec-kit/reference/bundles.html); in the spec-kit repo: [EXTENSION-DEVELOPMENT-GUIDE](https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-DEVELOPMENT-GUIDE.md), [EXTENSION-API-REFERENCE](https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-API-REFERENCE.md), [EXTENSION-PUBLISHING-GUIDE](https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-PUBLISHING-GUIDE.md), [workflows/ARCHITECTURE.md](https://github.com/github/spec-kit/blob/main/workflows/ARCHITECTURE.md), [workflows/PUBLISHING.md](https://github.com/github/spec-kit/blob/main/workflows/PUBLISHING.md), [presets/PUBLISHING.md](https://github.com/github/spec-kit/blob/main/presets/PUBLISHING.md), [docs/community](https://github.com/github/spec-kit/tree/main/docs/community). This file is the map and the dev loop.
+
 ## Choose the owning package type
 
 - New command names / hooks / capabilities → **extension**.
@@ -62,11 +64,11 @@ specify extension add --dev ./my-ext --force
 specify extension remove my-ext
 ```
 
-Publish: tag a SemVer release; users install via `--from <archive-url>`. For catalog discovery, submit via the Extension Submission issue template (community catalog is discovery-only). **Bump the version on every content change** — `specify extension update` is version-driven.
+Publish: tag a SemVer release; users install via `--from <archive-url>`. For catalog discovery, submit via the [Extension Submission issue template](https://github.com/github/spec-kit/issues/new?template=extension_submission.yml) — full process: [EXTENSION-PUBLISHING-GUIDE](https://github.com/github/spec-kit/blob/main/extensions/EXTENSION-PUBLISHING-GUIDE.md) and [community/extensions](https://github.github.io/spec-kit/community/extensions.html). **Bump the version on every content change** — `specify extension update` is version-driven.
 
 ## Presets
 
-Start from the scaffold at `presets/scaffold/` in the spec-kit repo. Layout: `preset.yml`, `README.md`, `LICENSE`, optional `templates/`, `commands/`, `CHANGELOG.md`.
+Start from the scaffold at [`presets/scaffold/`](https://github.com/github/spec-kit/tree/main/presets/scaffold) in the spec-kit repo. Layout: `preset.yml`, `README.md`, `LICENSE`, optional `templates/`, `commands/`, `CHANGELOG.md`.
 
 Manifest essentials:
 
@@ -112,9 +114,11 @@ specify preset resolve spec-template     # confirm your layer wins
 specify preset remove my-preset
 ```
 
-Catalog submission requires a preset-scoped README containing a literal `specify preset add ...` command; the validation workflow checks this mechanically (README link must end in `README.md`). Submit a PR adding the entry to `presets/catalog.community.json` (entries sorted by id) plus a row in `docs/community/presets.md`.
+Catalog submission requires a preset-scoped README containing a literal `specify preset add ...` command; the validation workflow checks this mechanically (README link must end in `README.md`). Submit a PR adding the entry to [`presets/catalog.community.json`](https://github.com/github/spec-kit/blob/main/presets/catalog.community.json) (entries sorted by id) plus a row in [`docs/community/presets.md`](https://github.com/github/spec-kit/blob/main/docs/community/presets.md) — process: [presets/PUBLISHING.md](https://github.com/github/spec-kit/blob/main/presets/PUBLISHING.md), [community/presets](https://github.github.io/spec-kit/community/presets.html).
 
 ## Workflows
+
+Implementation reference (authoritative): [reference/workflows](https://github.github.io/spec-kit/reference/workflows.html) — [definition](https://github.github.io/spec-kit/reference/workflows.html#workflow-definition), [step types](https://github.github.io/spec-kit/reference/workflows.html#step-types), [expressions](https://github.github.io/spec-kit/reference/workflows.html#expressions), [custom step packages](https://github.github.io/spec-kit/reference/workflows.html#custom-step-packages), [shell safety](https://github.github.io/spec-kit/reference/workflows.html#interpolation-and-shell-safety). Minimal shape:
 
 ```yaml
 schema_version: "1.0"
@@ -151,7 +155,7 @@ steps:
     command: speckit.plan
 ```
 
-Step types: `command`, `prompt`, `shell`, `github`, `init`, `slot`, `gate`, `if`, `switch`, `while`, `do-while`, `fan-out`, `fan-in`, `workflow` (call an installed workflow with declared inputs/outputs). Expressions use `{{ inputs.x }}`, `{{ steps.<id>.output.<key> }}`, `{{ context.run_id }}`; filters: `default`, `join`, `contains`, `map`, `from_json`, `to_json`, `upper`, `lower`, `split`, `length`.
+Step types, expressions, filters, and defaults: [reference/workflows](https://github.github.io/spec-kit/reference/workflows.html#step-types). Don't restate them here — the docs are versioned with the CLI.
 
 Local test loop:
 
@@ -163,11 +167,13 @@ specify workflow add ./workflow.yml --dev    # install local package (dir with w
 
 Customize installed workflows with project overlays instead of editing them (edits survive bundle/workflow updates). Overlay anchors are base step ids; operations: `insert_after`, `insert_before`, `replace`, `remove`; lower priority value wins.
 
-**Shell safety:** a `shell` step runs unsandboxed with user privileges. Interpolation is raw string substitution — no quoting/escaping. Constrain any interpolated value with `enum` or keep it out of `run` fields entirely. Keep agent/prompt output out of `run`; branch with `if`/`switch` instead. Review any catalog workflow before running it.
+**Shell safety:** a `shell` step runs unsandboxed with user privileges. Interpolation is raw string substitution — no quoting/escaping. Constrain any interpolated value with `enum` or keep it out of `run` fields entirely. Keep agent/prompt output out of `run`; branch with `if`/`switch` instead. Review any catalog workflow before running it. Details: [shell safety](https://github.github.io/spec-kit/reference/workflows.html#interpolation-and-shell-safety).
 
-Publish: follow `workflows/PUBLISHING.md` in the spec-kit repo (catalog entry with `url` + `sha256`; community catalog).
+Publish: [workflows/PUBLISHING.md](https://github.com/github/spec-kit/blob/main/workflows/PUBLISHING.md) (catalog entry with `url` + `sha256`; community catalog).
 
 ## Step packages
+
+Package contract: [docs/community/workflow-steps.md](https://github.com/github/spec-kit/blob/main/docs/community/workflow-steps.md) ([reference section](https://github.github.io/spec-kit/reference/workflows.html#custom-step-packages)). Shape:
 
 ```
 my-step/
@@ -224,7 +230,7 @@ specify bundle install ./bundle.yml --refresh      # apply manifest changes to a
 specify bundle build --path ./my-bundle --output dist/   # -> versioned .zip artifact
 ```
 
-Publish: host the built `.zip` and a catalog JSON entry (`id`, `version`, `download_url`, `sha256`, `requires`, `provides`; historical releases under `releases`). If the bundle pulls components from non-default catalogs, document those catalog URLs and prove a clean install. Community submissions go through the Bundle Submission issue template.
+Publish: host the built `.zip` and a catalog JSON entry (`id`, `version`, `download_url`, `sha256`, `requires`, `provides`; historical releases under `releases`) — [reference](https://github.github.io/spec-kit/reference/bundles.html#publish-a-bundle), [community/bundles](https://github.github.io/spec-kit/community/bundles.html), [Bundle Submission template](https://github.com/github/spec-kit/issues/new?template=bundle_submission.yml). If the bundle pulls components from non-default catalogs, document those catalog URLs and prove a clean install.
 
 Versioning model (policy recommendation): components you co-release with the bundle share the bundle's version; foreign components keep their own versions but stay pinned. Never mix the two rules implicitly.
 
