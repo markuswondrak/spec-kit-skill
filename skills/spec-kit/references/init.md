@@ -40,7 +40,7 @@ Integration keys include `claude`, `copilot`, `gemini`, `opencode`, `codex`, `ge
 - Command style (`/speckit.specify`) — Claude in commands mode, Copilot, Gemini, opencode (`.opencode/commands/speckit.*.md`), ...
 - Skills style (`/speckit-specify`, `.claude/skills/speckit-specify/SKILL.md`) — Claude now installs skills by default; Codex/Command Code skills use `$speckit-*`; Kimi uses `/skill:speckit-*`.
 
-The generated files in `.claude/`, `.opencode/`, etc. are authoritative for the project's agent.
+The generated files in `.claude/`, `.opencode/`, etc. are authoritative for the project's agent. They are installed artifacts, not intent: ignore `…/speckit*` in the **root** `.gitignore` ([../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt)), never in `.specify/.gitignore` ([vcs-policy.md](vcs-policy.md)).
 
 ## After init
 
@@ -79,3 +79,4 @@ specify integration use <key>               # set default without uninstalling o
 - `.specify/` exists with `templates/`, `scripts/`, `memory/constitution.md`, `integration.json`.
 - The agent directory contains the expected `speckit-*` commands/skills.
 - Strict policy rules are in place per [vcs-policy.md](vcs-policy.md): in `.specify/.gitignore` (init never re-runs) or in the root `.gitignore` with `.specify/` prefixes (init is the restore path).
+- `git status --short` is clean right after init/restore, agent command directories included.
