@@ -90,7 +90,7 @@ Report a short bullet list, not raw command dumps. Flag what needs action (drift
 | Component command missing in agent | Not installed/enabled, or the agent needs a restart; check `specify <kind> list`. |
 | `Extension 'x' not found` | Not in an install-allowed catalog; may be community-only → `specify extension info x`, then `--from`. |
 | Bundle install refuses a version | One version per component id: another bundle or independent install pins it. |
-| Fresh clone broken | Installed copies committed without pins; fix the declaration (bundle), not the artifacts. |
+| Fresh clone broken | Installed copies committed without pins; fix the declaration (bundle), not the artifacts. Restore with `specify bundle install .specify/bundles/<id>` and keep that command in the agent instruction file ([vcs-policy](references/vcs-policy.md)). |
 | Restore depends on remembered commands | Components were added one by one; declare them in `.specify/bundles/<id>/bundle.yml` and restore with `bundle install .specify/bundles/<id>` ([vcs-policy](references/vcs-policy.md)). |
 | Official extensions stop installing after adding a catalog | A project `<kind>-catalogs.yml` replaces the built-in stack — re-list the official catalog next to yours ([packages](references/packages.md)). |
 | Dirty tree or vanished rules after `specify init --force` | Init rewrites `.specify/.gitignore` and re-stamps `integrations/*.manifest.json`; keep strict rules in the root `.gitignore` and ignore the manifests ([vcs-policy](references/vcs-policy.md)). |

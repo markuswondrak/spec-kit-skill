@@ -12,7 +12,7 @@ Three categories:
 | --- | --- | --- | --- |
 | Project intent | constitution, `specs/`, project-owned bundle source (`.specify/bundles/<id>/`), `.specify/*-catalogs.yml`, `.specify/integration.json`, `.specify/extensions.yml`, `<ext>-config.yml`, workflow overlays | yes | — |
 | Installed artifacts | `.specify/extensions/*/*`, `.specify/presets/*`, `.specify/workflows/*`, installed step packages, agent command/skill files outside `.specify/` (`<agent-dir>/…/speckit*`) | no | `specify bundle install` (or per-kind `add`); agent commands also via `specify init` / `specify integration install` |
-| Runtime/install state | `.specify/extensions/.registry`, `.specify/bundle-records.json`, `workflow-registry.json`, `feature.json`, `local-config.yml`, caches, `.backup/`, `runs/` | no | rebuilt by the tooling |
+| Runtime/install state | `.specify/extensions/.registry`, `.specify/bundle-records.json`, `workflow-registry.json`, `feature.json`, `local-config.yml`, `.workflow-install.lock`, caches, `.backup/`, `runs/` | no | rebuilt by the tooling |
 
 Spec Kit's default is deliberately narrow. `specify init` scaffolds a managed `.specify/.gitignore` containing only:
 
@@ -115,6 +115,19 @@ Why a declaration instead of remembered `add` commands:
 What a local source does and does not change: the **manifest** resolves locally, without consulting the catalog stack, so it works offline and depends on no catalog's install policy. The **components** are installed exactly as `specify <kind> add` would install them — bundled assets work offline, catalog components need an install-allowed catalog, and a discovery-only pin is still refused. Point the pins at components your catalogs allow.
 
 A changed manifest against an existing record is refused until you pass `--refresh` (which re-applies owned components and drops ones no longer declared). `bundle build` is output: without `--output` the artifact lands next to `bundle.yml`, where `bundles/*/*.zip` ignores it.
+
+### Restore hint in the agent instruction file
+
+A blank checkout has no installed components and no `speckit*` commands, so an agent that opens it needs the one command that rebuilds them. Write it into the project's agent instruction file (`AGENTS.md`, `CLAUDE.md`, …), outside any managed block:
+
+```md
+## Spec Kit
+
+`.specify/` holds project intent (constitution, templates, `bundles/`); installed components and the
+`speckit*` commands are not committed. Restore them with `specify bundle install .specify/bundles/<project>`.
+```
+
+Spec Kit never writes that file itself. The opt-in `agent-context` extension (`specify extension add agent-context`) owns only the section between `<!-- SPECKIT START -->` and `<!-- SPECKIT END -->`; everything outside those markers stays exactly as written.
 
 ## Fresh-clone acceptance test
 

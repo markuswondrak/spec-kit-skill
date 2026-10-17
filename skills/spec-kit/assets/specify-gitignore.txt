@@ -29,6 +29,9 @@ workflows/.cache/
 extensions/.cache/
 extensions/.backup/
 
+# Workflow installs take an flock at the .specify/ root and never unlink it.
+.workflow-install.lock
+
 # --- Project-owned bundle source (.specify/bundles/<id>/) is intent: bundle.yml
 # --- and its README.md stay tracked. Only the built artifact is derived output. ---
 bundles/*/*.zip

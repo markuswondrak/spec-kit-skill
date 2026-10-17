@@ -44,6 +44,7 @@ specify extension remove <id> [--keep-config] [--force]
 - `--version` uses the winning install-allowed catalog only; it never falls back to a lower-priority source.
 - Config layers (highest wins): extension defaults < `<ext>-config.yml` (commit) < `<ext>-config.local.yml` or `local-config.yml` (machine-local, ignored) < `SPECKIT_<EXT>_*` env vars.
 - New extension config: copy the shipped template (name varies, e.g. `<ext>-config.template.yml` or `config-template.yml`) to `.specify/extensions/<ext>/<ext>-config.yml`.
+- Bundled `agent-context` (`specify extension add agent-context`, opt-in) maintains the agent instruction file's `<!-- SPECKIT START -->`…`<!-- SPECKIT END -->` block and nothing else; the file is picked per integration (`AGENTS.md` for pi/opencode/codex/generic, `CLAUDE.md` for claude, `.github/copilot-instructions.md` for copilot), overridable via `context_file`/`context_files`.
 
 ## Presets
 

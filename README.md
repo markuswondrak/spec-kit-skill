@@ -93,6 +93,7 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 - `specify init --here --force` rewrite behavior checked on 1.0.13: managed `.specify/.gitignore` and integration manifests are regenerated — the VCS policy documents the placement that keeps restores clean
 - A project-owned bundle source at `.specify/bundles/<id>/` works end to end on 1.0.13: `validate`, `install <dir>`, `--refresh`, and `build --output` succeed, `init --force` leaves the directory untouched, the strict rules do not match `bundle.yml` (only the built `*.zip`), and `git status` is clean after install
 - Catalog stack semantics checked on 1.0.13: a project `<kind>-catalogs.yml` **replaces** the built-in stack (official + community disappear until re-listed), `bundle-catalogs.yml` merges instead, and the community catalog needs no registration — `init` writes no catalog file and `catalog list` reports "Using built-in default catalog stack"
+- Fresh-clone restore verified end to end (real `git clone` of a strict-policy project + `specify bundle install .specify/bundles/<id>`): components and workflow come back and `git status` is clean — the asset now also ignores `.specify/.workflow-install.lock`, the 0-byte flock the CLI leaves at the `.specify/` root after every workflow install
 
 ## Compatibility
 
