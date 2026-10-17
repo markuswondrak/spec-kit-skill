@@ -10,7 +10,7 @@ Three categories:
 
 | Category | Examples | Commit? | Restored by |
 | --- | --- | --- | --- |
-| Project intent | constitution, `specs/`, bundle declarations, `.specify/*-catalogs.yml`, `.specify/integration.json`, `.specify/extensions.yml`, `<ext>-config.yml`, workflow overlays | yes | — |
+| Project intent | constitution, `specs/`, project-owned bundle source (`.specify/bundles/<id>/`), `.specify/*-catalogs.yml`, `.specify/integration.json`, `.specify/extensions.yml`, `<ext>-config.yml`, workflow overlays | yes | — |
 | Installed artifacts | `.specify/extensions/*/*`, `.specify/presets/*`, `.specify/workflows/*`, installed step packages, agent command/skill files outside `.specify/` (`<agent-dir>/…/speckit*`) | no | `specify bundle install` (or per-kind `add`); agent commands also via `specify init` / `specify integration install` |
 | Runtime/install state | `.specify/extensions/.registry`, `.specify/bundle-records.json`, `workflow-registry.json`, `feature.json`, `local-config.yml`, caches, `.backup/`, `runs/` | no | rebuilt by the tooling |
 
@@ -37,7 +37,7 @@ Why each group:
 - **Install-state records** (`.registry`, `bundle-records.json`, `workflow-registry.json`): the bundler resolves what is installed mainly through these records, not by inspecting the filesystem. Committing them while ignoring the files they describe makes a fresh clone claim components are installed when they are absent.
 - `.specify/extensions.yml` is *not* install state: it is extension enablement and hook configuration, and is committed.
 
-Locally authored packages are the one judgment call: if the project deliberately owns a package's source, keep the source outside `.specify/` (or commit it explicitly) and treat the installed copy as reconstructable.
+Locally authored packages are the one judgment call: if the project deliberately owns a package's source, keep the source outside `.specify/` (or commit it explicitly) and treat the installed copy as reconstructable. The project-owned bundle source (`.specify/bundles/<id>/`, see below) is the one hand-authored tree that lives inside `.specify/` on purpose — the strict rules do not touch it.
 
 ## Agent command directories (outside `.specify/`)
 
@@ -85,12 +85,45 @@ Some projects also ignore the init-scaffolded core (`.specify/scripts/`, `.speci
 
 - Multi-integration projects need one extra step: `specify init --force --integration <agent>` collapses `.specify/integration.json` to that one integration (observed on 1.0.13), so re-run `specify integration install <other>` for the rest and commit the restored `integration.json`. Each installed integration still needs its `speckit*` line.
 
+## Project-owned bundle (`.specify/bundles/<id>/`)
+
+A project with more than one component declares its stack once, as a committed bundle source:
+
+```text
+.specify/bundles/<project>/
+├── bundle.yml     # the declaration: the pinned component set
+└── README.md      # what this bundle is for (required by `bundle build`)
+```
+
+`bundle.yml` carries the bundle `id`, a SemVer `version`, and one pinned entry per component; bump the
+version on every manifest change. The README stays short: what the project bundle is for, and the two
+commands that use it (`validate`, `install` by path).
+
+```bash
+specify bundle validate --path .specify/bundles/<project>
+specify bundle install .specify/bundles/<project>              # restore, idempotent
+specify bundle install .specify/bundles/<project> --refresh     # apply manifest edits
+specify bundle build --path .specify/bundles/<project> --output <dir>   # only when publishing
+```
+
+Why a declaration instead of remembered `add` commands:
+
+- The declaration is reviewable and diffable; a runbook of `specify extension add …` calls is neither and drifts silently.
+- `.specify/bundle-records.json` records what was installed but **not** the source it came from, so it cannot restore anything by itself. `specify bundle install <id>` only works for a catalog bundle — a project-owned bundle is always restored by path.
+- Single `specify <kind> add` runs remain fine for a one-off experiment; they must never be the restore path.
+
+What a local source does and does not change: the **manifest** resolves locally, without consulting the catalog stack, so it works offline and depends on no catalog's install policy. The **components** are installed exactly as `specify <kind> add` would install them — bundled assets work offline, catalog components need an install-allowed catalog, and a discovery-only pin is still refused. Point the pins at components your catalogs allow.
+
+A changed manifest against an existing record is refused until you pass `--refresh` (which re-applies owned components and drops ones no longer declared). `bundle build` is output: without `--output` the artifact lands next to `bundle.yml`, where `bundles/*/*.zip` ignores it.
+
 ## Fresh-clone acceptance test
 
 A declaration is only real if a clean checkout reconstructs it:
 
 ```bash
 git clone <repo> && cd <repo>
+specify bundle install .specify/bundles/<project>   # project-owned bundle source
+# or, for a catalog bundle:
 specify bundle install <bundle-id>
 ```
 
@@ -100,7 +133,7 @@ If more steps are needed — manual `specify extension add` runs, remembered pri
 
 Do not test by deleting `.specify/extensions/`, `.specify/presets/`, or `.specify/workflows/` from a working checkout: that also deletes tracked intent (extension project config, overlays, installation metadata). Always clone into a clean directory.
 
-For projects without a bundle: either re-add each component explicitly as part of the restore procedure, or package the stack as a bundle so `bundle install` is the single declaration. Prefer the bundle. For scaffold-restored projects the single command is the `specify init --here --force` line above — same acceptance: it runs, the agent commands are present, `git status` is clean.
+For projects without a bundle: either re-add each component explicitly as part of the restore procedure, or declare the stack as a project-owned bundle (see [Project-owned bundle](#project-owned-bundle-specifybundlesid)) so `bundle install` is the single declaration. Prefer the bundle. For scaffold-restored projects the single command is the `specify init --here --force` line above — same acceptance: it runs, the agent commands are present, `git status` is clean.
 
 ## Deliberate priorities
 
@@ -116,6 +149,7 @@ Composition is part of the declaration:
 - [ ] If init is the restore path: `.specify/.gitignore` stays managed-only and `.specify/integrations/*.manifest.json` is ignored.
 - [ ] No installed copy, registry, cache, or backup is tracked; `git status` is clean after `bundle install` and after a scaffold restore — agent command/skill directories included.
 - [ ] Agent command directories are ignored in the root `.gitignore` ([../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt)), not in `.specify/.gitignore`; every installed integration has a matching line.
-- [ ] Bundle declaration and pins are committed; every pin matches what is installed.
+- [ ] Bundle declaration and pins are committed (`.specify/bundles/<id>/`, or a catalog bundle id); every pin matches what is installed.
+- [ ] The bundle source is tracked while its artifact is not: `git check-ignore -v .specify/bundles/<id>/bundle.yml` stays silent and no `bundles/*/*.zip` is committed.
 - [ ] Preset priorities are explicit; composition strategies are intentional.
-- [ ] Fresh clone + `specify bundle install <id>` reaches a working state and matches the pins.
+- [ ] Fresh clone + `specify bundle install .specify/bundles/<id>` (or `bundle install <id>` for a catalog bundle) reaches a working state and matches the pins.

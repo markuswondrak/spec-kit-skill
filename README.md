@@ -56,6 +56,7 @@ Search the spec-kit catalogs for issue-tracking extensions, summarize trust and 
 Scaffold a spec-kit preset that enforces our review checklist, test it with --dev.
 Create a spec-kit workflow that runs specify -> plan with a gate in between and test it locally.
 Bootstrap a fresh clone using its bundle declaration; report missing pins.
+Declare our installed spec-kit stack as a project-owned bundle at .specify/bundles/<project> and verify a clean restore.
 ```
 
 ## What's inside
@@ -66,7 +67,7 @@ Bootstrap a fresh clone using its bundle declaration; report missing pins.
 | `skills/spec-kit/references/init.md` | CLI install/upgrade, `specify init` flags, integrations, env vars |
 | `skills/spec-kit/references/packages.md` | Extension/preset/workflow/step/bundle commands, catalogs, trust model |
 | `skills/spec-kit/references/authoring.md` | Package ownership rules, manifests, strategies, dev loops, publishing |
-| `skills/spec-kit/references/vcs-policy.md` | Intent vs. installed artifacts, strict `.gitignore` policy, fresh-clone test |
+| `skills/spec-kit/references/vcs-policy.md` | Intent vs. installed artifacts, strict `.gitignore` policy, project-owned bundle source, fresh-clone test |
 | `skills/spec-kit/assets/specify-gitignore.txt` | Drop-in rules for the strict `.specify` version-control policy |
 | `skills/spec-kit/assets/agent-commands-gitignore.txt` | Root-`.gitignore` rules for agent command/skill directories outside `.specify/` |
 | `.claude-plugin/` | Claude Code plugin + marketplace manifests (auto-discovers `skills/`) |
@@ -90,6 +91,8 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 - Agent command directories outside `.specify/` are classified as installed artifacts: a project with `pi` + `opencode`, and a skills-style `claude` project, reach a clean `git status` right after `specify init --force` / `bundle install`; extension commands (`speckit.bug.*`) are covered too, and hand-written prompts plus third-party skills stay visible
 - The gitignore policy is tested against a real project: installed artifacts ignored, project config tracked, `local-config.yml` still ignored
 - `specify init --here --force` rewrite behavior checked on 1.0.13: managed `.specify/.gitignore` and integration manifests are regenerated — the VCS policy documents the placement that keeps restores clean
+- A project-owned bundle source at `.specify/bundles/<id>/` works end to end on 1.0.13: `validate`, `install <dir>`, `--refresh`, and `build --output` succeed, `init --force` leaves the directory untouched, the strict rules do not match `bundle.yml` (only the built `*.zip`), and `git status` is clean after install
+- Catalog stack semantics checked on 1.0.13: a project `<kind>-catalogs.yml` **replaces** the built-in stack (official + community disappear until re-listed), `bundle-catalogs.yml` merges instead, and the community catalog needs no registration — `init` writes no catalog file and `catalog list` reports "Using built-in default catalog stack"
 
 ## Compatibility
 
