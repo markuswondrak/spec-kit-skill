@@ -91,13 +91,13 @@ A project with more than one component declares its stack once, as a committed b
 
 ```text
 .specify/bundles/<project>/
-├── bundle.yml     # the declaration: the pinned component set
-└── README.md      # what this bundle is for (required by `bundle build`)
+├── bundle.yml     # the pinned Spec Kit components this project depends on
+└── README.md      # the stack this repo pins + the command that restores it
 ```
 
 `bundle.yml` carries the bundle `id`, a SemVer `version`, and one pinned entry per component; bump the
-version on every manifest change. The README stays short: what the project bundle is for, and the two
-commands that use it (`validate`, `install` by path).
+version on every manifest change. The README states the pinned stack and its restore command
+(`specify bundle install .specify/bundles/<project>`); `bundle build` requires the file.
 
 ```bash
 specify bundle validate --path .specify/bundles/<project>
