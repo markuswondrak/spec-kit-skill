@@ -4,7 +4,7 @@ description: Operate GitHub Spec Kit (spec-driven development toolkit, `specify`
 license: MIT
 metadata:
   author: Markus Wondrak
-  version: "1.4"
+  version: "1.5"
 ---
 
 # Spec Kit
@@ -29,7 +29,7 @@ Canonical docs: <https://github.github.io/spec-kit/> — [quickstart](https://gi
 
 - Run `specify` from the project root (the directory containing `.specify/`). Component commands fail without an initialized project.
 - In agent or CI contexts, pass explicit flags plus `--non-interactive`; never rely on interactive prompts.
-- Commit intent, reconstruct installations: never commit installed component copies, registries, or caches ([vcs-policy](references/vcs-policy.md)).
+- Commit intent, reconstruct installations: never commit installed component copies, registries, caches, or the agent's command/skill files outside `.specify/` ([vcs-policy](references/vcs-policy.md)).
 - Pin versions (`--version`, bundle pins). Unpinned bundle component entries are rejected.
 - The community catalog is discovery-only. Vet an entry (`info`), then install via `--from <url>`.
 - Extensions, workflows, and step packages execute code. Review untrusted sources first; shell steps run unsandboxed with your privileges.
@@ -53,7 +53,7 @@ Report a short bullet list, not raw command dumps. Flag what needs action (drift
 1. Check tooling: `specify check`, `specify version --features`. Install: `uv tool install specify-cli`; upgrade: `specify self upgrade`.
 2. Initialize: `specify init . --integration <agent> --non-interactive` (directory non-empty: add `--force`).
 3. In an interactive session, ask the user before init whether to add the optional first-party extras: the `lean` preset (`--preset lean`) and/or the `bugfix` bundle (`specify bundle install bugfix` right after init). Then add components at init: `--preset <id>`, repeated `--extension <name|path|url>` (e.g. `--extension git`).
-4. Apply the strict VCS policy: the rules from [assets/specify-gitignore.txt](assets/specify-gitignore.txt) go in `.specify/.gitignore` — or in the root `.gitignore` with `.specify/` prefixes when `specify init --force` is part of the restore path, since init rewrites the managed file ([vcs-policy](references/vcs-policy.md)).
+4. Apply the strict VCS policy: the rules from [assets/specify-gitignore.txt](assets/specify-gitignore.txt) go in `.specify/.gitignore` — or in the root `.gitignore` with `.specify/` prefixes when `specify init --force` is part of the restore path, since init rewrites the managed file. Agent command directories sit outside `.specify/`: add [assets/agent-commands-gitignore.txt](assets/agent-commands-gitignore.txt) to the **root** `.gitignore` (prefix-scoped `…/speckit*` rules, one line per installed integration) ([vcs-policy](references/vcs-policy.md)).
 5. Verify: `specify integration status`, `specify extension list`. Acceptance test: fresh clone + `specify bundle install <bundle-id>` reaches a working state.
 
 ## Flow: install a package
@@ -91,4 +91,5 @@ Report a short bullet list, not raw command dumps. Flag what needs action (drift
 | Bundle install refuses a version | One version per component id: another bundle or independent install pins it. |
 | Fresh clone broken | Installed copies committed without pins; fix the declaration (bundle), not the artifacts. |
 | Dirty tree or vanished rules after `specify init --force` | Init rewrites `.specify/.gitignore` and re-stamps `integrations/*.manifest.json`; keep strict rules in the root `.gitignore` and ignore the manifests ([vcs-policy](references/vcs-policy.md)). |
+| `?? .pi/`, `?? .opencode/`, `?? .claude/` right after init | Agent command/skill files are installed artifacts. Ignore `…/speckit*` in the **root** `.gitignore`, one line per installed integration ([assets/agent-commands-gitignore.txt](assets/agent-commands-gitignore.txt)); never in `.specify/.gitignore`. |
 | Stale behavior after an update | `specify self check` for CLI drift; `specify <kind> update`; the upstream version was not bumped. |

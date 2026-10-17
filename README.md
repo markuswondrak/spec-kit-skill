@@ -68,6 +68,7 @@ Bootstrap a fresh clone using its bundle declaration; report missing pins.
 | `skills/spec-kit/references/authoring.md` | Package ownership rules, manifests, strategies, dev loops, publishing |
 | `skills/spec-kit/references/vcs-policy.md` | Intent vs. installed artifacts, strict `.gitignore` policy, fresh-clone test |
 | `skills/spec-kit/assets/specify-gitignore.txt` | Drop-in rules for the strict `.specify` version-control policy |
+| `skills/spec-kit/assets/agent-commands-gitignore.txt` | Root-`.gitignore` rules for agent command/skill directories outside `.specify/` |
 | `.claude-plugin/` | Claude Code plugin + marketplace manifests (auto-discovers `skills/`) |
 
 The agent loads `SKILL.md` when relevant and pulls in references only as needed.
@@ -86,6 +87,7 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 - Claude Code manifests pass `claude plugin validate .`
 - Installable via `npx skills add markuswondrak/spec-kit-skill` and `claude plugin marketplace add markuswondrak/spec-kit-skill`
 - Commands and flags checked against `specify` 1.0.13
+- Agent command directories outside `.specify/` are classified as installed artifacts: a project with `pi` + `opencode`, and a skills-style `claude` project, reach a clean `git status` right after `specify init --force` / `bundle install`; extension commands (`speckit.bug.*`) are covered too, and hand-written prompts plus third-party skills stay visible
 - The gitignore policy is tested against a real project: installed artifacts ignored, project config tracked, `local-config.yml` still ignored
 - `specify init --here --force` rewrite behavior checked on 1.0.13: managed `.specify/.gitignore` and integration manifests are regenerated — the VCS policy documents the placement that keeps restores clean
 
