@@ -10,7 +10,7 @@ Official reference (authoritative for commands, flags, and semantics): [extensio
 | Preset | Override/adapt existing templates and commands | No (modifies) | `.specify/presets/<id>/` |
 | Workflow | YAML orchestration of commands/gates/shell | Runs commands | `.specify/workflows/<id>/` |
 | Step | Custom step type (Python package) for workflows | Executes code | `.specify/workflows/steps/<id>/` |
-| Bundle | Versioned, pinned composition of the above | No (distribution) | records in `.specify/bundle-records.json` |
+| Bundle | Versioned, pinned composition of the above | No (distribution) | Source: `.specify/bundles/<id>/`; records in `.specify/bundle-records.json` |
 
 Template resolution order (first match wins): `.specify/templates/overrides/` → presets (lowest priority number first) → extensions → core `.specify/templates/`.
 
@@ -18,10 +18,12 @@ Extension hooks are surfaced before/after core commands (`before_specify`, `afte
 
 ## Catalogs and trust
 
-- Built-in stack: official catalog (install-allowed) + community catalog (discovery-only). The community catalog is deliberately not installable; do not flip its policy.
-- Install a vetted community entry directly: `specify extension info <id>` prints a candidate archive URL; then `specify extension add <id> --from <url>`.
-- Manage per kind: `specify extension|preset|workflow|bundle catalog list|add|remove`, and `specify workflow step catalog ...` for steps.
-- Config files (committed project intent): `.specify/extension-catalogs.yml`, `.specify/preset-catalogs.yml`, `.specify/workflow-catalogs.yml`. User scope: `~/.specify/...`. `SPECKIT_CATALOG_URL` overrides the whole extension stack.
+- Built-in stack (implicit — no config file, and `init` writes none): official catalog (install-allowed) + community catalog (discovery-only). **The community catalog needs no registration**: it is already active for `search`. Never flip it to install-allowed — that is the vetting boundary, not a missing setting.
+- Install a vetted discovery-only entry directly: `specify extension info <id>` prints a candidate archive URL; then `specify extension add <id> --from <url>` (default-deny trust confirmation; non-interactive init: `--trust-extension-urls`). Curating your own install-allowed catalog is the other supported route.
+- **A project `<kind>-catalogs.yml` replaces the built-in stack, it does not extend it**: after `specify extension catalog add <url> --name ours --install-allowed`, only `ours` is active — official and community catalogs are gone until you list them again. Bundles differ: `bundle-catalogs.yml` merges, the built-in stack always stays as fallback.
+- Manage per kind: `specify extension|preset|workflow|bundle catalog list|add|remove`, and `specify workflow step catalog ...` for steps. `bundle catalog add` uses `--policy install-allowed|discovery-only`; the other kinds use `--install-allowed/--no-install-allowed`.
+- Config files (committed project intent): `.specify/extension-catalogs.yml`, `.specify/preset-catalogs.yml`, `.specify/workflow-catalogs.yml`, `.specify/step-catalogs.yml`, `.specify/bundle-catalogs.yml`. User scope: `~/.specify/...`; `specify init --force` leaves them untouched.
+- Env overrides replace every catalog with one hard-coded install-allowed entry — they bypass the vetting boundary: `SPECKIT_CATALOG_URL`, `SPECKIT_PRESET_CATALOG_URL`, `SPECKIT_WORKFLOW_CATALOG_URL`, `SPECKIT_STEP_CATALOG_URL`.
 - Lower priority number = higher precedence; the first catalog that lists an id wins. `discovery-only` sources appear in search/info but refuse installs.
 
 Review catalogs supplied by an unfamiliar project (`catalog list`) before installing from it — a project providing config is not evidence anything was vetted.
@@ -42,6 +44,7 @@ specify extension remove <id> [--keep-config] [--force]
 - `--version` uses the winning install-allowed catalog only; it never falls back to a lower-priority source.
 - Config layers (highest wins): extension defaults < `<ext>-config.yml` (commit) < `<ext>-config.local.yml` or `local-config.yml` (machine-local, ignored) < `SPECKIT_<EXT>_*` env vars.
 - New extension config: copy the shipped template (name varies, e.g. `<ext>-config.template.yml` or `config-template.yml`) to `.specify/extensions/<ext>/<ext>-config.yml`.
+- Bundled `agent-context` (`specify extension add agent-context`, opt-in) maintains the agent instruction file's `<!-- SPECKIT START -->`…`<!-- SPECKIT END -->` block and nothing else; the file is picked per integration (`AGENTS.md` for pi/opencode/codex/generic, `CLAUDE.md` for claude, `.github/copilot-instructions.md` for copilot), overridable via `context_file`/`context_files`.
 
 ## Presets
 
@@ -90,9 +93,11 @@ specify bundle catalog list|add|remove ...
 
 Semantics to respect:
 
+- The source may be a catalog id, a `.zip` artifact, a bundle **directory** (containing `bundle.yml`), or a `bundle.yml` file. Local sources resolve without consulting the catalog stack; the components are still installed through the per-kind machinery, so their catalog policy applies.
 - `install` initializes the project on demand; it is idempotent (matching pins are skipped) and records provenance.
 - All component pins must match exactly (compatible newer *packaged patch* releases warn and are used). One version per component id across all bundles.
 - Changing a recorded bundle's version/pins requires `--refresh` (local sources: pass the revised path with `--refresh`).
+- `build` needs a `README.md` next to `bundle.yml` and packs that directory; `--output` decides where the artifact lands (default: next to the manifest).
 - `remove` uninstalls only components the bundle contributed; shared or independently installed components stay.
 - On failed install: no record is written, components from that run are removed best-effort.
 

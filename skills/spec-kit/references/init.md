@@ -31,6 +31,8 @@ Key options:
 
 In interactive sessions, ask the user before init (together with the integration choice) whether to add the optional first-party extras: the `lean` preset (`--preset lean`) and/or the `bugfix` bundle (`specify bundle install bugfix` directly after init). In CI/agent runs, skip the question.
 
+Init flags describe the first commit. A project that depends on more than one component declares them once as a project-owned bundle (`.specify/bundles/<id>/bundle.yml`, installed by path) instead of repeating `--preset`/`--extension` later ([vcs-policy.md](vcs-policy.md)).
+
 Initialization is offline: assets come from the installed CLI package, so templates always match the CLI version.
 
 `--force` merges into an existing checkout, but managed artifacts are rewritten: `.specify/.gitignore` is reset to the managed template (appended rules are lost; [vcs-policy.md](vcs-policy.md) shows the root-`.gitignore` placement) and `.specify/integrations/<key>.manifest.json` gets a fresh `installed_at`.
@@ -47,10 +49,11 @@ The generated files in `.claude/`, `.opencode/`, etc. are authoritative for the 
 1. `specify check` — required tools and installed integrations.
 2. `specify integration status` — what the project currently targets.
 3. Git workflows need the git extension (not installed by default):
-   `specify extension add git` (bundled; works offline).
+   `specify extension add git` (bundled; works offline). In a project that declares its stack, this is an entry in the bundle instead of a one-off add.
 4. Optional first-party bundle when bugs are in scope: `specify bundle install bugfix` (bug extension + bugfix workflow, pinned). The `lean` preset is passed to init itself (`--preset lean`).
-5. Apply the strict VCS policy from [vcs-policy.md](vcs-policy.md).
-6. Acceptance test on a fresh clone: `git clone ... && specify bundle install <bundle-id>` must reach a working state.
+5. More than one component → declare the set once in `.specify/bundles/<id>/bundle.yml` (plus a short `README.md`) and install from that path; per-component `add` runs are for experiments, never the restore path ([vcs-policy.md](vcs-policy.md)).
+6. Apply the strict VCS policy from [vcs-policy.md](vcs-policy.md).
+7. Acceptance test on a fresh clone: `git clone ... && specify bundle install .specify/bundles/<id>` (or `bundle install <bundle-id>` for a catalog bundle) must reach a working state.
 
 ## Manage integrations after init
 
