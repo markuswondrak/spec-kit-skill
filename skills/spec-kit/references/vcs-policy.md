@@ -110,7 +110,7 @@ Why a declaration instead of remembered `add` commands:
 
 - The declaration is reviewable and diffable; a runbook of `specify extension add …` calls is neither and drifts silently.
 - `.specify/bundle-records.json` records what was installed but **not** the source it came from, so it cannot restore anything by itself. `specify bundle install <id>` only works for a catalog bundle — a project-owned bundle is always restored by path.
-- Single `specify <kind> add` runs remain fine for a one-off experiment; they must never be the restore path.
+- `specify <kind> add` is for experiments; the restore path is always `bundle install`.
 
 What a local source does and does not change: the **manifest** resolves locally, without consulting the catalog stack, so it works offline and depends on no catalog's install policy. The **components** are installed exactly as `specify <kind> add` would install them — bundled assets work offline, catalog components need an install-allowed catalog, and a discovery-only pin is still refused. Point the pins at components your catalogs allow.
 

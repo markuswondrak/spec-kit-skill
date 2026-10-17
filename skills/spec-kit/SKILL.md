@@ -61,7 +61,7 @@ Report a short bullet list, not raw command dumps. Flag what needs action (drift
 
 1. Discover: `specify <kind> search <query>` → `specify <kind> info <id>` (trust: `verified` vs `community`).
 2. For bundles, review the expanded plan first: `specify bundle info <id>`.
-3. Install pinned: `specify bundle install .specify/bundles/<id>` (project-owned) or `specify bundle install <id>` (catalog bundle); a single component may still go in with `specify <kind> add <id> --version <v>`. In a project that has a bundle, adding a component means editing the manifest and re-running with `--refresh`.
+3. Install pinned: `specify bundle install .specify/bundles/<id>` (project-owned stack) or `specify bundle install <id>` (catalog bundle). In a project that has a bundle, adding a component means editing the manifest and re-running with `--refresh`.
 4. Configure if needed: copy the shipped config template to `<ext>-config.yml`, edit, commit.
 5. Verify: `specify <kind> list`; restart the agent if new commands are missing.
 

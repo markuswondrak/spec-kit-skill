@@ -232,9 +232,9 @@ specify bundle build --path ./my-bundle --output dist/   # -> versioned .zip art
 
 Publish: host the built `.zip` and a catalog JSON entry (`id`, `version`, `download_url`, `sha256`, `requires`, `provides`; historical releases under `releases`) — [reference](https://github.github.io/spec-kit/reference/bundles.html#publish-a-bundle), [community/bundles](https://github.github.io/spec-kit/community/bundles.html), [Bundle Submission template](https://github.com/github/spec-kit/issues/new?template=bundle_submission.yml). If the bundle pulls components from non-default catalogs, document those catalog URLs and prove a clean install.
 
-Author loop vs. project intent: `./bundle.yml` from a scratch directory is the author test — a bundle you publish. A project declaring its own stack commits the source at `.specify/bundles/<id>/` and restores it by path; that bundle is not published, so it does not need the build step ([vcs-policy.md](vcs-policy.md)). `validate` and `build` take the bundle **directory**, and `build` requires a `README.md` next to `bundle.yml`.
-
 Versioning model (policy recommendation): components you co-release with the bundle share the bundle's version; foreign components keep their own versions but stay pinned. Never mix the two rules implicitly.
+
+A project-owned stack is committed at `.specify/bundles/<id>/` (`bundle.yml` + `README.md`) and installed by path — `specify bundle install .specify/bundles/<id>` ([vcs-policy.md](vcs-policy.md)).
 
 ## Cross-cutting
 
