@@ -1,4 +1,8 @@
 # Strict .specify version-control policy.
+#
+# Agent command directories live OUTSIDE .specify/ and are NOT covered here:
+# add assets/agent-commands-gitignore.txt to the ROOT .gitignore instead.
+#
 # Two safe placements (see references/vcs-policy.md):
 # - Append to the managed .specify/.gitignore (patterns relative to .specify/).
 #   Only durable if `specify init` is never re-run: `init --force` rewrites that

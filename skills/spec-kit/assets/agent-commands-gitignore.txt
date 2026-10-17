@@ -1,0 +1,80 @@
+# Spec Kit agent commands — installed artifacts OUTSIDE .specify/.
+#
+# Placement: the ROOT .gitignore. Never append this to .specify/.gitignore:
+# a subdirectory .gitignore cannot match paths outside its own directory
+# (`../.pi/prompts/` does nothing), and `specify init --force` rewrites the
+# managed .specify/.gitignore anyway.
+#
+# The patterns are prefix-scoped (`.../speckit*`, not the whole directory) so
+# hand-written prompts and third-party skills living in the same directories
+# stay visible. They are also agent-agnostic: every generated file or skill
+# folder is named `speckit...` (`speckit.plan.md`, `speckit-plan/SKILL.md`,
+# `speckit.plan.agent.md`, `speckit-events.ts`), including commands that
+# extensions contribute.
+#
+# Keep the list in sync with `.specify/integration.json`: add the line for an
+# integration when you install it. For an integration that is missing here
+# (new integration, `generic` with a custom --commands-dir), read the exact
+# paths from `.specify/integrations/<key>.manifest.json` — see
+# references/vcs-policy.md ("Agent command directories").
+#
+# Verified against specify 1.0.13.
+
+# --- commands / skills generated per integration ---
+.agents/*/speckit*
+.alquimia/skills/speckit*
+.augment/commands/speckit*
+.bob/*/speckit*
+.claude/skills/speckit*
+.clinerules/workflows/speckit*
+.codebuddy/commands/speckit*
+.commandcode/skills/speckit*
+.cursor/skills/speckit*
+.devin/skills/speckit*
+.dsh/skills/speckit*
+.factory/skills/speckit*
+.firebender/commands/speckit*
+.forge/commands/speckit*
+.gemini/commands/speckit*
+.github/agents/speckit*
+.github/skills/speckit*
+.github/hooks/speckit.json
+.goose/recipes/speckit*
+.grok/skills/speckit*
+.junie/commands/speckit*
+.kilo/commands/speckit*
+.kimi-code/skills/speckit*
+.kiro/prompts/speckit*
+.lingma/skills/speckit*
+.minimax/skills/speckit*
+.omp/commands/speckit*
+.opencode/commands/speckit*
+.opencode/plugin/speckit-events.ts
+.pi/prompts/speckit*
+.qoder/skills/speckit*
+.qwen/commands/speckit*
+.rovodev/skills/speckit*
+.shai/commands/speckit*
+.tabnine/agent/commands/speckit*
+.trae/skills/speckit*
+.vibe/skills/speckit*
+.zcode/skills/speckit*
+
+# --- legacy layouts (older specify releases; harmless to keep) ---
+.claude/commands/speckit*
+.github/prompts/speckit*
+.kilocode/workflows/speckit*
+.kimi/skills/speckit*
+.opencode/command/speckit*
+
+# --- Not covered on purpose, commit these ---
+# Shared agent configuration the integration merges into, not an artifact:
+# .claude/settings.json, .vscode/settings.json, opencode.json,
+# .codex/config.toml, .github/copilot-instructions.md
+#
+# Skills installed by tools other than specify (e.g. project-scoped
+# .claude/skills/<name>/, .agents/skills/<name>/) do not match `speckit*`:
+# commit or ignore them, but decide explicitly — never ignore the whole
+# skills directory.
+#
+# Out of project scope: the hermes integration installs to ~/.hermes/skills.

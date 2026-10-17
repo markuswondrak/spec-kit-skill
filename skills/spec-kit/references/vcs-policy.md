@@ -11,7 +11,7 @@ Three categories:
 | Category | Examples | Commit? | Restored by |
 | --- | --- | --- | --- |
 | Project intent | constitution, `specs/`, bundle declarations, `.specify/*-catalogs.yml`, `.specify/integration.json`, `.specify/extensions.yml`, `<ext>-config.yml`, workflow overlays | yes | — |
-| Installed artifacts | `.specify/extensions/*/*`, `.specify/presets/*`, `.specify/workflows/*`, installed step packages | no | `specify bundle install` (or per-kind `add`) |
+| Installed artifacts | `.specify/extensions/*/*`, `.specify/presets/*`, `.specify/workflows/*`, installed step packages, agent command/skill files outside `.specify/` (`<agent-dir>/…/speckit*`) | no | `specify bundle install` (or per-kind `add`); agent commands also via `specify init` / `specify integration install` |
 | Runtime/install state | `.specify/extensions/.registry`, `.specify/bundle-records.json`, `workflow-registry.json`, `feature.json`, `local-config.yml`, caches, `.backup/`, `runs/` | no | rebuilt by the tooling |
 
 Spec Kit's default is deliberately narrow. `specify init` scaffolds a managed `.specify/.gitignore` containing only:
@@ -25,7 +25,7 @@ extensions/*/local-config.yml
 
 ## Strict policy (catalog-managed projects)
 
-Append the rules from [../assets/specify-gitignore.txt](../assets/specify-gitignore.txt) to `.specify/.gitignore` (patterns are relative to `.specify/`; prefix everything with `.specify/` instead if you keep the rules in the root `.gitignore`).
+Append the rules from [../assets/specify-gitignore.txt](../assets/specify-gitignore.txt) to `.specify/.gitignore` (patterns are relative to `.specify/`; prefix everything with `.specify/` instead if you keep the rules in the root `.gitignore`). The agent command directories outside `.specify/` need their own rules — see the next section and [../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt).
 
 Placement follows the restore path: if re-running `specify init` is part of how a checkout gets rebuilt (see "Scaffold-restored projects" below), the rules belong in the **root `.gitignore`** — anything appended to `.specify/.gitignore` is wiped by `init --force` and the post-restore `git status` turns dirty. Appending to the managed file is only durable in projects that never re-run init.
 
@@ -39,6 +39,36 @@ Why each group:
 
 Locally authored packages are the one judgment call: if the project deliberately owns a package's source, keep the source outside `.specify/` (or commit it explicitly) and treat the installed copy as reconstructable.
 
+## Agent command directories (outside `.specify/`)
+
+`specify init` and component installs also write the agent's command or skill files **outside** `.specify/`: `.pi/prompts/speckit.plan.md`, `.opencode/commands/speckit.specify.md`, `.claude/skills/speckit-plan/SKILL.md`, `.github/agents/speckit.plan.agent.md`, and so on. They are installed artifacts, not intent:
+
+- every generated command file is recorded with a content hash in `.specify/integrations/<key>.manifest.json`;
+- the same preset output is rendered byte-identically into each installed integration;
+- extension commands land there too (`speckit.bug.*`, `speckit.wireframe.*`) and are **not** in the integration manifest, so the manifest alone does not enumerate them.
+
+Ignore them in the **root `.gitignore`**, never in `.specify/.gitignore`: a subdirectory `.gitignore` cannot match paths outside its own directory (`../.pi/prompts/` has no effect), and `specify init --force` rewrites the managed file anyway. Use [../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt). The patterns are prefix-scoped (`<agent-dir>/<commands-subdir>/speckit*`) rather than whole-directory ignores, so hand-written prompts and third-party skills in the same directories stay visible.
+
+Keep the list in sync with `.specify/integration.json`: add the matching line when you install an integration. For an integration that is not in the asset (a new integration, or `generic` with a custom `--commands-dir`), read the generated paths from `.specify/integrations/<key>.manifest.json` and add the line for their directory:
+
+```bash
+python3 - <<'PY'
+import glob, json, os
+for f in glob.glob(".specify/integrations/*.manifest.json"):
+    for path in json.load(open(f))["files"]:
+        if not path.startswith(".specify/"):
+            print(os.path.dirname(path) + "/speckit*")
+PY
+```
+
+### Skills installed by other tools
+
+`.claude/skills/`, `.agents/skills/`, `.opencode/skills/`, … are shared directories. Spec Kit only owns the `speckit*` entries in them. Everything else — for example the `cockpit-run-context` skill a TUI installs at start — is not classified by this policy: commit it or ignore it, but decide explicitly. Never ignore a skills directory as a whole.
+
+### Agent config files are not artifacts
+
+Integration setup also *merges* into shared agent config — `.claude/settings.json`, `.vscode/settings.json`, `opencode.json`, `.codex/config.toml`. Those files carry project or machine configuration and must stay visible; the `speckit*` pattern deliberately does not match them. The integration-owned exception is Copilot's `.github/hooks/speckit.json`.
+
 ## Scaffold-restored projects (no bundle)
 
 Some projects also ignore the init-scaffolded core (`.specify/scripts/`, `.specify/templates/`) and rebuild everything with one `specify init` command instead of a bundle:
@@ -51,7 +81,9 @@ Some projects also ignore the init-scaffolded core (`.specify/scripts/`, `.speci
   specify init --here --force --non-interactive --integration <agent> --script sh [--preset <id>]
   ```
 
-  Expected afterwards: `.specify/scripts`, `.specify/templates`, installed presets/workflows, and the agent commands are back; `git status` is clean.
+  Expected afterwards: `.specify/scripts`, `.specify/templates`, installed presets/workflows, and the agent commands are back (ignored by the root-level `speckit*` rules); `git status` is clean.
+
+- Multi-integration projects need one extra step: `specify init --force --integration <agent>` collapses `.specify/integration.json` to that one integration (observed on 1.0.13), so re-run `specify integration install <other>` for the rest and commit the restored `integration.json`. Each installed integration still needs its `speckit*` line.
 
 ## Fresh-clone acceptance test
 
@@ -62,7 +94,7 @@ git clone <repo> && cd <repo>
 specify bundle install <bundle-id>
 ```
 
-`bundle install` initializes the project on demand, so this single command is the full restore path. Then confirm installed versions match the bundle pins (`specify bundle list --json`).
+`bundle install` initializes the project on demand, so this single command is the full restore path. Then confirm installed versions match the bundle pins (`specify bundle list --json`) and that `git status --short` is empty — agent command directories included.
 
 If more steps are needed — manual `specify extension add` runs, remembered priorities, wiki instructions — the model is incomplete. Usually one of three things is missing: a bundle dependency, a version pin, or project-owned customization that should have been committed.
 
@@ -82,7 +114,8 @@ Composition is part of the declaration:
 
 - [ ] Strict rules are placed deliberately: in `.specify/.gitignore` (only if init is never re-run) or in the root `.gitignore` (when `specify init --force` is the restore path).
 - [ ] If init is the restore path: `.specify/.gitignore` stays managed-only and `.specify/integrations/*.manifest.json` is ignored.
-- [ ] No installed copy, registry, cache, or backup is tracked; `git status` is clean after `bundle install` and after a scaffold restore.
+- [ ] No installed copy, registry, cache, or backup is tracked; `git status` is clean after `bundle install` and after a scaffold restore — agent command/skill directories included.
+- [ ] Agent command directories are ignored in the root `.gitignore` ([../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt)), not in `.specify/.gitignore`; every installed integration has a matching line.
 - [ ] Bundle declaration and pins are committed; every pin matches what is installed.
 - [ ] Preset priorities are explicit; composition strategies are intentional.
 - [ ] Fresh clone + `specify bundle install <id>` reaches a working state and matches the pins.
