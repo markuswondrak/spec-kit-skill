@@ -23,9 +23,33 @@ extensions/*/local-config.yml
 
 `specify init --here --force` (the scripted variant for a non-empty checkout) **rewrites that managed file from the template — appended rules are lost**, contradicting the file's "changes are preserved" header (observed on 1.0.13). The same run re-stamps `.specify/integrations/<key>.manifest.json` with a fresh `installed_at`.
 
+## Choosing a policy
+
+The policy is a project property: chosen **once at init**, never re-asked. Detect it afterwards — the rules and the bundle source are committed, so a fresh clone answers the same way.
+
+| | Spec Kit default | Strict |
+| --- | --- | --- |
+| Installed copies, records, `speckit*` files | committed — a clone already has them | ignored — restored (below) |
+| `.specify/.gitignore` | exactly as scaffolded | strict rules (below) |
+| Extras | — | [../assets/specify-gitignore.txt](../assets/specify-gitignore.txt) + [../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt) |
+| Restore hint in the agent instruction file | not needed | required |
+
+Both keep a bundle declaration when the project has more than one component: under strict it is the restore path, under the default it is the pin/declaration record.
+
+- **Non-interactive/CI: apply Spec Kit's default.** Strict only on an explicit instruction; the agent never chooses.
+- **Placement follows from the bundle answer, no second question:** with a bundle declaration (`.specify/bundles/<id>/bundle.yml`) init is not the restore path → append to `.specify/.gitignore`; without one → root `.gitignore` with `.specify/` prefixes (see *Scaffold-restored projects*).
+- **Detection**, and change only on explicit request:
+
+  ```bash
+  git check-ignore -v --no-index .specify/bundle-records.json .specify/presets/probe
+  ls .specify/bundles/*/bundle.yml 2>/dev/null
+  ```
+
+  Any match = strict, and the reported source file names the placement. Scaffold-restored projects also match `.specify/scripts/*`.
+
 ## Strict policy (catalog-managed projects)
 
-Append the rules from [../assets/specify-gitignore.txt](../assets/specify-gitignore.txt) to `.specify/.gitignore` (patterns are relative to `.specify/`; prefix everything with `.specify/` instead if you keep the rules in the root `.gitignore`). The agent command directories outside `.specify/` need their own rules — see the next section and [../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt).
+Only if that policy was chosen. Append the rules from [../assets/specify-gitignore.txt](../assets/specify-gitignore.txt) to `.specify/.gitignore` (patterns are relative to `.specify/`; prefix every rule with `.specify/` — negations included, `!.specify/extensions/*/*-config.yml` — if you keep the rules in the root `.gitignore`). The agent command directories outside `.specify/` need their own rules — see the next section and [../assets/agent-commands-gitignore.txt](../assets/agent-commands-gitignore.txt).
 
 Placement follows the restore path: if re-running `specify init` is part of how a checkout gets rebuilt (see "Scaffold-restored projects" below), the rules belong in the **root `.gitignore`** — anything appended to `.specify/.gitignore` is wiped by `init --force` and the post-restore `git status` turns dirty. Appending to the managed file is only durable in projects that never re-run init.
 
@@ -166,3 +190,4 @@ Composition is part of the declaration:
 - [ ] The bundle source is tracked while its artifact is not: `git check-ignore -v .specify/bundles/<id>/bundle.yml` stays silent and no `bundles/*/*.zip` is committed.
 - [ ] Preset priorities are explicit; composition strategies are intentional.
 - [ ] Fresh clone + `specify bundle install .specify/bundles/<id>` (or `bundle install <id>` for a catalog bundle) reaches a working state and matches the pins.
+- [ ] Under Spec Kit's default policy instead: installed copies and `speckit*` files are committed and `git status` is clean — no strict rules present.
