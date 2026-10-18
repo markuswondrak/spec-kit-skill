@@ -1,4 +1,5 @@
 # Strict .specify version-control policy.
+# Use only when the strict policy was chosen (references/vcs-policy.md -> Choosing a policy).
 #
 # Agent command directories live OUTSIDE .specify/ and are NOT covered here:
 # add assets/agent-commands-gitignore.txt to the ROOT .gitignore instead.
@@ -8,7 +9,8 @@
 #   Only durable if `specify init` is never re-run: `init --force` rewrites that
 #   file and drops appended rules (observed on 1.0.13).
 # - Put the rules in the root .gitignore with every pattern prefixed ".specify/"
-#   (e.g. ".specify/presets/*"). Required when init is part of the restore path.
+#   (e.g. ".specify/presets/*", negations too: "!.specify/extensions/*/*-config.yml").
+#   Required when init is part of the restore path.
 
 # --- Installed from catalogs. Reconstructed with `specify bundle install`. ---
 extensions/*/*
