@@ -234,6 +234,8 @@ Publish: host the built `.zip` and a catalog JSON entry (`id`, `version`, `downl
 
 Versioning model (policy recommendation): components you co-release with the bundle share the bundle's version; foreign components keep their own versions but stay pinned. Never mix the two rules implicitly.
 
+A project-owned stack is committed at `.specify/bundles/<id>/` (`bundle.yml` + `README.md`) and installed by path — `specify bundle install .specify/bundles/<id>` ([vcs-policy.md](vcs-policy.md)).
+
 ## Cross-cutting
 
 - Manifests are validated on install; keep ids lowercase-hyphenated, versions strict SemVer.
