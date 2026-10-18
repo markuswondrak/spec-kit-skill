@@ -29,7 +29,7 @@ Key options:
 | `--non-interactive` | Never prompt; fail instead of hanging. Required for agent harnesses. |
 | `--ignore-agent-tools` | Skip checks for agent CLI tools on the PATH. |
 
-In interactive sessions, ask the user before init (together with the integration choice) whether to add the optional first-party extras: the `lean` preset (`--preset lean`) and/or the `bugfix` bundle (`specify bundle install bugfix` directly after init). In CI/agent runs, skip the question.
+In interactive sessions, ask the user before init: optional first-party extras (`lean` preset via `--preset lean`; `bugfix` bundle via `specify bundle install bugfix` right after init) and the VCS policy — strict or Spec Kit's default ([vcs-policy.md](vcs-policy.md) → *Choosing a policy*). In CI/agent runs, skip the question and use the default policy.
 
 Init flags describe the first commit. A project that depends on more than one component declares them once as a project-owned bundle (`.specify/bundles/<id>/bundle.yml`, installed by path) instead of repeating `--preset`/`--extension` later ([vcs-policy.md](vcs-policy.md)).
 
@@ -52,7 +52,7 @@ The generated files in `.claude/`, `.opencode/`, etc. are authoritative for the 
    `specify extension add git` (bundled; works offline). In a project that declares its stack, this is an entry in the bundle instead of a one-off add.
 4. Optional first-party bundle when bugs are in scope: `specify bundle install bugfix` (bug extension + bugfix workflow, pinned). The `lean` preset is passed to init itself (`--preset lean`).
 5. More than one component → declare the set once in `.specify/bundles/<id>/bundle.yml` (plus a short `README.md`) and install from that path; per-component `add` runs are for experiments, never the restore path ([vcs-policy.md](vcs-policy.md)).
-6. Apply the strict VCS policy from [vcs-policy.md](vcs-policy.md).
+6. Apply the chosen VCS policy: strict per [vcs-policy.md](vcs-policy.md), or Spec Kit's default (commit the installed stack; no assets).
 7. Acceptance test on a fresh clone: `git clone ... && specify bundle install .specify/bundles/<id>` (or `bundle install <bundle-id>` for a catalog bundle) must reach a working state.
 
 ## Manage integrations after init
@@ -81,5 +81,5 @@ specify integration use <key>               # set default without uninstalling o
 - `specify --version` runs and matches the intended release.
 - `.specify/` exists with `templates/`, `scripts/`, `memory/constitution.md`, `integration.json`.
 - The agent directory contains the expected `speckit-*` commands/skills.
-- Strict policy rules are in place per [vcs-policy.md](vcs-policy.md): in `.specify/.gitignore` (init never re-runs) or in the root `.gitignore` with `.specify/` prefixes (init is the restore path).
-- `git status --short` is clean right after init/restore, agent command directories included.
+- VCS policy matches the init choice and is detectable ([vcs-policy.md](vcs-policy.md) → *Choosing a policy*): strict — rules in `.specify/.gitignore` or the root `.gitignore`; default — installed copies and commands tracked.
+- `git status --short` is clean right after init/restore, agent command directories included: under strict from ignoring them, under the default from committing the stack.
