@@ -1,7 +1,7 @@
 {
   "name": "spec-kit",
   "description": "Operate GitHub Spec Kit (specify CLI): initialize projects, manage extensions, presets, workflows, and bundles, author packages, apply the .specify VCS policy.",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "author": {
     "name": "Markus Wondrak",
     "url": "https://github.com/markuswondrak"

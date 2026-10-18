@@ -50,7 +50,7 @@ Short prompts that hit the ground running:
 
 ```text
 What's the spec-kit status here?
-Init spec-kit here for opencode, non-interactive; ask me about lean/bugfix first, then apply the strict .specify VCS policy.
+Init spec-kit here for opencode, non-interactive; ask me about lean/bugfix and whether to apply the strict .specify VCS policy or keep Spec Kit's default, then proceed.
 Show me specify bundle info bugfix, then install it pinned.
 Search the spec-kit catalogs for issue-tracking extensions, summarize trust and versions, install the best fit.
 Scaffold a spec-kit preset that enforces our review checklist, test it with --dev.
@@ -67,7 +67,7 @@ Declare our installed spec-kit stack as a project-owned bundle at .specify/bundl
 | `skills/spec-kit/references/init.md` | CLI install/upgrade, `specify init` flags, integrations, env vars |
 | `skills/spec-kit/references/packages.md` | Extension/preset/workflow/step/bundle commands, catalogs, trust model |
 | `skills/spec-kit/references/authoring.md` | Package ownership rules, manifests, strategies, dev loops, publishing |
-| `skills/spec-kit/references/vcs-policy.md` | Intent vs. installed artifacts, strict `.gitignore` policy, project-owned bundle source, fresh-clone test |
+| `skills/spec-kit/references/vcs-policy.md` | Policy choice (strict vs. Spec Kit default), intent vs. installed artifacts, project-owned bundle source, fresh-clone test |
 | `skills/spec-kit/assets/specify-gitignore.txt` | Drop-in rules for the strict `.specify` version-control policy |
 | `skills/spec-kit/assets/agent-commands-gitignore.txt` | Root-`.gitignore` rules for agent command/skill directories outside `.specify/` |
 | `.claude-plugin/` | Claude Code plugin + marketplace manifests (auto-discovers `skills/`) |
@@ -78,6 +78,7 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 
 - **Packages, not project files.** Catalogs declare, bundles pin, installs reconstruct.
 - **Commit intent, reconstruct installations.** Registries and installed copies never get committed next to the components they describe.
+- **Let the user choose the policy.** Strict is one option, not the default; the agent never applies it silently.
 - **Pin everything.** Versions, preset priorities, composition strategies — deliberately.
 - **Vet, then install.** Community catalogs are discovery-only; review before `--from`.
 - **Don't restate the docs.** Commands and manifests live in the [official docs](https://github.github.io/spec-kit/); the skill adds the operational layer and links out instead of duplicating.
@@ -94,6 +95,7 @@ The agent loads `SKILL.md` when relevant and pulls in references only as needed.
 - A project-owned bundle source at `.specify/bundles/<id>/` works end to end on 1.0.13: `validate`, `install <dir>`, `--refresh`, and `build --output` succeed, `init --force` leaves the directory untouched, the strict rules do not match `bundle.yml` (only the built `*.zip`), and `git status` is clean after install
 - Catalog stack semantics checked on 1.0.13: a project `<kind>-catalogs.yml` **replaces** the built-in stack (official + community disappear until re-listed), `bundle-catalogs.yml` merges instead, and the community catalog needs no registration — `init` writes no catalog file and `catalog list` reports "Using built-in default catalog stack"
 - Fresh-clone restore verified end to end (real `git clone` of a strict-policy project + `specify bundle install .specify/bundles/<id>`): components and workflow come back and `git status` is clean — the asset now also ignores `.specify/.workflow-install.lock`, the 0-byte flock the CLI leaves at the `.specify/` root after every workflow install
+- VCS policy choice checked on 1.0.13: the flow asks strict vs. Spec Kit's default (never in CI), the policy is detected from the working tree afterwards instead of re-asked, and placement follows the bundle answer — `.specify/.gitignore` with a bundle, root `.gitignore` with `.specify/` prefixes without one
 
 ## Compatibility
 
